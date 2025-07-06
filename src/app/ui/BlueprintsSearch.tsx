@@ -11,7 +11,7 @@ const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER || '';
 
 const blueprints: Blueprint[] = (blueprintNames as string[]).map((name) => ({
   name,
-  url: `${S3_FOLDER}/${name}`
+  url: `${S3_FOLDER}/${encodeURIComponent(name)}`
 }));
 
 export default function BlueprintSearch() {

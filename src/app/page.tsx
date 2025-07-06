@@ -40,7 +40,7 @@ export default function Home() {
             {blueprints.map((file) => (
               <a
                 key={file}
-                href={`${S3_FOLDER}/${file}`}
+                href={`${S3_FOLDER}/${encodeURIComponent(file)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block bg-white p-4 rounded-xl shadow-md hover:shadow-xl hover:bg-blue-50 transition duration-300 truncate text-blue-700 font-medium"
