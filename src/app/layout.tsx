@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/ui/globals.css";
 import ClientProviders from "./ClientProviders";
+import Navbar from "./ui/Navbar";
 
 
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="antialiased">
         <ClientProviders>
+          <Navbar/>
           {children}
         </ClientProviders>
       </body>
