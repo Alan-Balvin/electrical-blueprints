@@ -1,69 +1,113 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import blueprintNames from '@/data/blueprints.json';
+import { getComments, postComment } from '@/lib/dynamoClient';
 
-type Blueprint = {
-  name: string;
-  url: string;
+type Comment = {
+  message: string;
+  createdAt: string;
 };
 
 const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER || '';
 
-const blueprints: Blueprint[] = (blueprintNames as string[]).map((name) => ({
-  name,
-  url: `${S3_FOLDER}/${name}`,
-}));
-
 export default function BlueprintSearch() {
   const [search, setSearch] = useState('');
-  const [selectedBlueprint, setSelectedBlueprint] = useState<Blueprint | null>(null);
+  const [selectedBlueprint, setSelectedBlueprint] = useState<string | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
 
-  const filteredBlueprints = blueprints.filter((bp) =>
-    bp.name.toLowerCase().includes(search.toLowerCase())
+  const filteredBlueprints = (blueprintNames as string[]).filter((name) =>
+    name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const fetchComments = useCallback(async () => {
+    if (!selectedBlueprint) return;
+    const result = await getComments(selectedBlueprint);
+    setComments(result as Comment[]);
+  }, [selectedBlueprint]);
+
+  useEffect(() => {
+    if (selectedBlueprint) fetchComments();
+  }, [selectedBlueprint, fetchComments]);
+
+  const handleCommentSubmit = async () => {
+    if (!selectedBlueprint || !newComment.trim()) return;
+    await postComment(selectedBlueprint, newComment.trim());
+    setNewComment('');
+    fetchComments();
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 py-8 max-w-7xl mx-auto w-full">
-      {/* Sidebar de búsqueda */}
-      <div className="col-span-1">
-        <input
-          type="text"
-          placeholder="Search plan..."
-          className="w-full mb-6 p-3 border rounded shadow focus:outline-blue-500"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
+      {/* BÚSQUEDA */}
+      <input
+        type="text"
+        placeholder="Search plan..."
+        className="w-full mb-4 p-3 border rounded shadow focus:outline-blue-500"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-        {filteredBlueprints.length === 0 ? (
-          <p className="text-center text-gray-500 mt-12 text-lg">No plans found</p>
-        ) : (
-          <ul className="space-y-2">
-            {filteredBlueprints.map((bp) => (
-              <li key={bp.name}>
-                <button
-                  onClick={() => setSelectedBlueprint(bp)}
-                  className="w-full text-left bg-white p-4 rounded-xl shadow-md hover:shadow-xl hover:bg-blue-50 transition truncate text-blue-700 font-medium"
-                >
-                  {bp.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      {/* LISTADO */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {filteredBlueprints.map((name) => (
+          <button
+            key={name}
+            onClick={() => setSelectedBlueprint(name)}
+            className={`p-4 bg-white shadow rounded-xl hover:bg-blue-50 transition truncate ${
+              selectedBlueprint === name ? 'border-2 border-blue-500' : ''
+            }`}
+            title={name}
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
-      {/* Visor de planos */}
-      <div className="col-span-2">
-        {selectedBlueprint ? (
+      {/* VISOR Y COMENTARIOS */}
+      {selectedBlueprint && (
+        <div className="mt-10 space-y-6">
+          {/* Visor */}
           <iframe
-            src={selectedBlueprint.url}
-            className="w-full h-[80vh] rounded-xl border shadow"
+            src={`${S3_FOLDER}/${selectedBlueprint}`}
+            title={selectedBlueprint}
+            className="w-full h-[600px] border rounded-xl"
           />
-        ) : (
-          <p className="text-gray-600 text-center text-lg mt-20">Select a blueprint to preview</p>
-        )}
-      </div>
+
+          {/* Comentarios */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-xl font-semibold mb-4">Comments for {selectedBlueprint}</h2>
+
+            <div className="space-y-4 max-h-60 overflow-y-auto mb-6">
+              {comments.length === 0 ? (
+                <p className="text-gray-500">No comments yet.</p>
+              ) : (
+                comments.map((c, i) => (
+                  <div key={i} className="border-b pb-2">
+                    <p>{c.message}</p>
+                    <small className="text-gray-400">{new Date(c.createdAt).toLocaleString()}</small>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <textarea
+              placeholder="Write your comment..."
+              className="w-full p-3 border rounded shadow"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+
+            <button
+              onClick={handleCommentSubmit}
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Submit Comment
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
