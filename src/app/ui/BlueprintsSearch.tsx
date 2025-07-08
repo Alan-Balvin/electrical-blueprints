@@ -11,18 +11,19 @@ const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER || '';
 
 const blueprints: Blueprint[] = (blueprintNames as string[]).map((name) => ({
   name,
-  url: `${S3_FOLDER}/${encodeURIComponent(name)}`
+  url: `${S3_FOLDER}/${name}`,
 }));
 
 export default function BlueprintSearch() {
   const [search, setSearch] = useState('');
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
 
   const filteredBlueprints = blueprints.filter((bp) =>
     bp.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <input
         type="text"
         placeholder="Search plan..."
@@ -31,21 +32,26 @@ export default function BlueprintSearch() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {filteredBlueprints.length === 0 ? (
-        <p className="text-center text-gray-500 mt-12 text-lg">No plans found</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {filteredBlueprints.map((bp) => (
-            <a
-              key={bp.name}
-              href={bp.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:bg-blue-50 transition-shadow duration-300 flex items-center justify-center"
-            >
-              <p className="text-blue-700 font-medium text-lg truncate text-center">{bp.name}</p>
-            </a>
-          ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
+        {filteredBlueprints.map((bp) => (
+          <button
+            key={bp.name}
+            onClick={() => setSelectedUrl(bp.url)}
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:bg-blue-50 transition duration-300 truncate text-blue-700 font-medium text-left"
+          >
+            {bp.name}
+          </button>
+        ))}
+      </div>
+
+      {selectedUrl && (
+        <div className="mt-8 border-t pt-6">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">Plan Preview</h2>
+          <iframe
+            src={selectedUrl}
+            className="w-full h-[80vh] border rounded-xl shadow"
+            title="Blueprint Preview"
+          />
         </div>
       )}
     </div>
