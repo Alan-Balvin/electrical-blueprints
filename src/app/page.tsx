@@ -14,6 +14,10 @@ export default function Home() {
   if (!session) {
     return (
       <main className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-gray-100 to-gray-300 p-6">
+         <div
+        className="absolute inset-0 bg-center bg-cover opacity-40 filter brightness-110 contrast-125 pointer-events-none z-0"
+        style={{ backgroundImage: "url('/images/background.png')" }}
+      />
         <h1 className="text-5xl font-extrabold text-center text-gray-800 mb-6">
           Restricted Access to Electrical Blueprints
         </h1>
