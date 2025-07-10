@@ -58,10 +58,12 @@ export default function Home() {
 
         <section className="flex-1 flex flex-col overflow-hidden">
           <h1 className="text-4xl font-extrabold mb-6 text-center text-gray-900 tracking-wide">
-            H-vac Electric Plans
+            H-vac
           </h1>
           <div className="flex-1 overflow-y-auto pr-2">
             <BlueprintSearch />
+            <div className="bg-red-200 p-4">DEBUG: Esta parte está visible debajo del componente</div>
+
           </div>
         </section>
       </main>
