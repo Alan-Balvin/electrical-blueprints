@@ -6,18 +6,26 @@ const TABLE_NAME = 'BlueprintComments';
 export type Comment = {
   message: string;
   createdAt: string;
+ 
 };
 
-export async function postComment(blueprint: string, message: string, user?: string) {
+// Tipo completo del ítem en DynamoDB
+type CommentItem = {
+  blueprint: string;
+  createdAt: string;
+  message: string;
+ 
+};
+
+export async function postComment(blueprint: string, message: string) {
   const createdAt = new Date().toISOString();
 
-  const item: Record<string, any> = {
+  const item: CommentItem = {
     blueprint,
     createdAt,
     message,
+   
   };
-
-  if (user) item.user = user;
 
   const command = new PutCommand({
     TableName: TABLE_NAME,
@@ -39,8 +47,12 @@ export async function getComments(blueprint: string): Promise<Comment[]> {
 
   const res = await dynamo.send(command);
 
-  return (res.Items || []).map((item) => ({
-    message: item.message,
-    createdAt: item.createdAt,
-  }));
+  return (res.Items || []).map((item) => {
+    const i = item as CommentItem;
+    return {
+      message: i.message,
+      createdAt: i.createdAt,
+     
+    };
+  });
 }
