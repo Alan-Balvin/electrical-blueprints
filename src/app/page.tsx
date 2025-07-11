@@ -62,7 +62,7 @@ export default function Home() {
           </h1>
           <div className="flex-1 overflow-y-auto pr-2">
             <BlueprintSearch />
-            <div className="bg-red-200 p-4">DEBUG: Esta parte está visible debajo del componente</div>
+           
 
           </div>
         </section>
