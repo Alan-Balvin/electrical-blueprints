@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import blueprintNames from '@/data/blueprints.json';
-import { getComments, postComment } from '@/lib/dynamoClient';
 
 type Comment = {
   message: string;
@@ -17,25 +16,59 @@ export default function BlueprintSearch() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
 
-  const filteredBlueprints = (blueprintNames as string[]).filter((name) =>
+  const filteredBlueprints = blueprintNames.filter((name) =>
     name.toLowerCase().includes(search.toLowerCase())
   );
 
   const fetchComments = useCallback(async () => {
     if (!selectedBlueprint) return;
-    const result = await getComments(selectedBlueprint);
-    setComments(result as Comment[]);
+
+    try {
+      const res = await fetch('/api/get', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueprint: selectedBlueprint }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setComments(data.comments);
+      } else {
+        console.error('Error fetching comments:', data.error);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
   }, [selectedBlueprint]);
 
   useEffect(() => {
-    if (selectedBlueprint) fetchComments();
+    if (selectedBlueprint) {
+      fetchComments();
+    }
   }, [selectedBlueprint, fetchComments]);
 
   const handleCommentSubmit = async () => {
     if (!selectedBlueprint || !newComment.trim()) return;
-    await postComment(selectedBlueprint, newComment.trim());
-    setNewComment('');
-    fetchComments();
+
+    try {
+      const res = await fetch('/api/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueprint: selectedBlueprint, message: newComment.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setNewComment('');
+        fetchComments();
+      } else {
+        console.error('Error posting comment:', data.error);
+      }
+    } catch (err) {
+      console.error('Post error:', err);
+    }
   };
 
   return (
@@ -86,7 +119,9 @@ export default function BlueprintSearch() {
                 comments.map((c, i) => (
                   <div key={i} className="border-b pb-2">
                     <p>{c.message}</p>
-                    <small className="text-gray-400">{new Date(c.createdAt).toLocaleString()}</small>
+                    <small className="text-gray-400">
+                      {new Date(c.createdAt).toLocaleString()}
+                    </small>
                   </div>
                 ))
               )}

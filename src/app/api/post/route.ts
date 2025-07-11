@@ -5,8 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { blueprint, message } = await req.json();
 
-    // 🚨 Revisión rápida de las claves
-    console.log('🔐 AWS KEYS:', process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY);
+    
 
     if (!blueprint || !message) {
       return NextResponse.json({ error: 'Missing blueprint or message' }, { status: 400 });
