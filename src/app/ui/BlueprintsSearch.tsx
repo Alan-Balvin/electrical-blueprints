@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import blueprintNames from '@/data/blueprints.json';
-import BlueprintComments from './BlueprintComments.tsx.jsx';
+import BlueprintComments from './BlueprintComments.tsx';
 
 
 const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER || '';
