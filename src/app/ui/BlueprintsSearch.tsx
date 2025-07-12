@@ -1,75 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import blueprintNames from '@/data/blueprints.json';
+import BlueprintComments from './BlueprintComments.tsx.jsx';
 
-type Comment = {
-  message: string;
-  createdAt: string;
-};
 
 const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER || '';
 
 export default function BlueprintSearch() {
   const [search, setSearch] = useState('');
   const [selectedBlueprint, setSelectedBlueprint] = useState<string | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState('');
 
   const filteredBlueprints = blueprintNames.filter((name) =>
     name.toLowerCase().includes(search.toLowerCase())
   );
-
-  const fetchComments = useCallback(async () => {
-    if (!selectedBlueprint) return;
-
-    try {
-      const res = await fetch('/api/get', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blueprint: selectedBlueprint }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setComments(data.comments);
-      } else {
-        console.error('Error fetching comments:', data.error);
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-    }
-  }, [selectedBlueprint]);
-
-  useEffect(() => {
-    if (selectedBlueprint) {
-      fetchComments();
-    }
-  }, [selectedBlueprint, fetchComments]);
-
-  const handleCommentSubmit = async () => {
-    if (!selectedBlueprint || !newComment.trim()) return;
-
-    try {
-      const res = await fetch('/api/post', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blueprint: selectedBlueprint, message: newComment.trim() }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setNewComment('');
-        fetchComments();
-      } else {
-        console.error('Error posting comment:', data.error);
-      }
-    } catch (err) {
-      console.error('Post error:', err);
-    }
-  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
@@ -109,38 +53,7 @@ export default function BlueprintSearch() {
           />
 
           {/* Comentarios */}
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-4">Comments for {selectedBlueprint}</h2>
-
-            <div className="space-y-4 max-h-60 overflow-y-auto mb-6">
-              {comments.length === 0 ? (
-                <p className="text-gray-500">No comments yet.</p>
-              ) : (
-                comments.map((c, i) => (
-                  <div key={i} className="border-b pb-2">
-                    <p>{c.message}</p>
-                    <small className="text-gray-400">
-                      {new Date(c.createdAt).toLocaleString()}
-                    </small>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <textarea
-              placeholder="Write your comment..."
-              className="w-full p-3 border rounded shadow"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-
-            <button
-              onClick={handleCommentSubmit}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Submit Comment
-            </button>
-          </div>
+          <BlueprintComments blueprint={selectedBlueprint} />
         </div>
       )}
     </div>
