@@ -1,12 +1,15 @@
 import { getComments } from '@/lib/dynamoClient';
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest, { params }: { params: { blueprint: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { blueprint: string } }
+) {
   try {
-    const blueprint = params.blueprint;
+    const { blueprint } = params;
 
     if (!blueprint) {
-      return new Response(JSON.stringify({ error: 'Missing blueprint parameter' }), { status: 400 });
+      return NextResponse.json({ error: 'Missing blueprint parameter' }, { status: 400 });
     }
 
     console.log(`🔍 Consultando comentarios para blueprint: ${blueprint}`);
@@ -15,12 +18,9 @@ export async function GET(req: NextRequest, { params }: { params: { blueprint: s
 
     console.log(`✅ Comentarios obtenidos: ${comments.length}`);
 
-    return new Response(JSON.stringify({ comments }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ comments });
   } catch (error) {
     console.error('❌ Error fetching comments:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
