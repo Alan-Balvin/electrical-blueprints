@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-
-
 type Comment = {
   message: string;
   createdAt: string;
@@ -15,10 +13,8 @@ export default function BlueprintComments({ blueprint }: { blueprint: string }) 
 
   const fetchComments = useCallback(async () => {
     try {
-      const res = await fetch('/api/get', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blueprint }),
+      const res = await fetch(`/api/comments/${blueprint}`, {
+        method: 'GET',  // GET para obtener
       });
 
       const data = await res.json();
@@ -40,8 +36,8 @@ export default function BlueprintComments({ blueprint }: { blueprint: string }) 
     if (!newComment.trim()) return;
 
     try {
-      const res = await fetch('/api/post', {
-        method: 'POST',
+      const res = await fetch('/api/comments', {
+        method: 'POST',  // POST para enviar
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blueprint, message: newComment.trim() }),
       });
