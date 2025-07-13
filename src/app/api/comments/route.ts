@@ -6,7 +6,10 @@ export async function POST(req: Request) {
     const { blueprint, message } = body;
 
     if (!blueprint || !message) {
-      return new Response(JSON.stringify({ error: 'Missing blueprint or message' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Missing blueprint or message' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     await postComment(blueprint, message);
@@ -16,7 +19,10 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error posting comment:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    console.error('❌ Error posting comment:', error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

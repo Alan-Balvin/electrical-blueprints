@@ -1,10 +1,12 @@
 import { getComments } from '@/lib/dynamoClient';
+import { NextRequest } from 'next/server';
 
-export async function GET(req: Request) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { blueprint: string } }
+) {
   try {
-    const url = new URL(req.url);
-    const parts = url.pathname.split('/');
-    const blueprint = parts[parts.length - 1];
+    const { blueprint } = params;
 
     if (!blueprint) {
       return new Response(JSON.stringify({ error: 'Missing blueprint parameter' }), { status: 400 });
@@ -17,7 +19,7 @@ export async function GET(req: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error(error);
+    console.error('❌ Error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
