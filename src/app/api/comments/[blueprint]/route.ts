@@ -1,25 +1,22 @@
+// src/app/api/comments/[blueprint]/route.ts
 import { getComments } from '@/lib/dynamoClient';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { blueprint: string } }
-) {
+export async function GET(req: NextRequest) {
   try {
-    const { blueprint } = params;
+    const url = new URL(req.url);
+    const parts = url.pathname.split('/');
+    const blueprint = parts[parts.length - 1]; // última parte de la ruta
 
     if (!blueprint) {
-      return new Response(JSON.stringify({ error: 'Missing blueprint parameter' }), { status: 400 });
+      return NextResponse.json({ error: 'Missing blueprint parameter' }, { status: 400 });
     }
 
     const comments = await getComments(blueprint);
 
-    return new Response(JSON.stringify({ comments }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ comments }, { status: 200 });
   } catch (error) {
-    console.error('❌ Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    console.error('❌ Error fetching comments:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
