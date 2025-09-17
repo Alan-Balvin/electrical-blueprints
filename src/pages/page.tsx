@@ -4,8 +4,7 @@ import React from 'react';
 import blueprints from '@/data/blueprints.json';
 import BlueprintSearch from './ui/BlueprintsSearch';
 
-import { useSession } from 'next-auth/react';
-import AuthButton from './ui/AuthButton';
+import { useSession, signIn } from 'next-auth/react';
 
 const S3_FOLDER = process.env.NEXT_PUBLIC_S3_FOLDER;
 
@@ -25,7 +24,12 @@ export default function Home() {
         <p className="text-lg text-gray-600 mb-8 text-center max-w-md">
           Access detailed electrical plans for Novotel Living Mazatlán. Please sign in with GitHub to continue.
         </p>
-        <AuthButton/>
+        <button
+          onClick={() => signIn('github')}
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-lg"
+        >
+          Sign in with GitHub
+        </button>
       </main>
     );
   }

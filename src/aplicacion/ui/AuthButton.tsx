@@ -1,6 +1,6 @@
 'use client';
 
-import { signOut, useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import React from 'react';
 
 export default function AuthButton() {
@@ -24,17 +24,11 @@ export default function AuthButton() {
         </div>
       ) : (
         <button
-  onClick={() =>
-    window.open(
-      `${window.location.origin}/api/auth/signin/github`,
-      '_blank',
-      'width=600,height=700'
-    )
-  }
-  className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
->
-  Sign in with GitHub
-</button>
+          onClick={() => signIn('github')}
+          className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Sign in with GitHub
+        </button>
       )}
     </div>
   );
